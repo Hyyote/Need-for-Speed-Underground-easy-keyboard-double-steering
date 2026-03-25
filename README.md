@@ -1,2 +1,3 @@
 # Need-for-Speed-Underground-easy-keyboard-double-steering
-double steering without the need for a physical or virtual controller
+## Place nfs_ds.asi in the scripts folder, nfs_ds.ini next to speed.exe
+## Configue it through the .ini
