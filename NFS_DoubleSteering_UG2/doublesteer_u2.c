@@ -24,6 +24,7 @@
  * Configuration (loaded from nfs_ds.ini)
  * ═══════════════════════════════════════════════════════════════ */
 static float         g_deflection   = 0.45f;  /* partial hold magnitude  */
+static float         g_spikeMag     = 1.5f;   /* spike magnitude (>1 = beyond normal lock) */
 static int           g_interval     = 8;       /* frames per cycle        */
 static int           g_duration     = 2;       /* spike frames per cycle  */
 static DWORD         g_keyLeft      = VK_LEFT;
@@ -103,6 +104,13 @@ static void load_config(void)
     if (pct < 0)  pct = 0;      /* 0 = release fully (classic DS) */
     if (pct > 95) pct = 95;
     g_deflection = pct / 100.0f;
+
+    /* Spike magnitude */
+    int spk = GetPrivateProfileIntA("DoubleSteering",
+                                    "SpikeMagnitude", 150, ini);
+    if (spk < 100) spk = 100;   /* minimum = normal full lock  */
+    if (spk > 300) spk = 300;   /* cap at 3x                   */
+    g_spikeMag = spk / 100.0f;
 
     /* Enabled */
     g_enabled = GetPrivateProfileIntA("DoubleSteering", "Enabled", 1, ini);
@@ -216,7 +224,7 @@ static void __cdecl DS_SteerHandler(int port, int event,
     int pos = g_frame % g_interval;
 
     if (pos < g_duration)
-        *steerVal = direction * 1.0f;          /* full lock spike  */
+        *steerVal = direction * g_spikeMag;     /* beyond-lock spike */
     else
         *steerVal = direction * g_deflection;  /* partial / zero   */
 
